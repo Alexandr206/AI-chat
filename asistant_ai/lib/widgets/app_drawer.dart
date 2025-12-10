@@ -16,21 +16,21 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Получаем ключи (ID) чатов, инвертируем, чтобы новые были сверху
     final chatIds = chatHistory.keys.toList().reversed.toList();
+    final theme = Theme.of(context);
 
     return Drawer(
+      backgroundColor: theme.scaffoldBackgroundColor, // Адаптивный фон
       child: Column(
         children: [
-          // Шапка
           UserAccountsDrawerHeader(
             accountName: const Text("AI Assistant"),
             accountEmail: const Text("История переписок"),
             currentAccountPicture: CircleAvatar(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              child: Icon(Icons.smart_toy, size: 40, color: Theme.of(context).colorScheme.primary),
+              backgroundColor: theme.colorScheme.surface,
+              child: Icon(Icons.smart_toy, size: 40, color: theme.colorScheme.primary),
             ),
-            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+            decoration: BoxDecoration(color: theme.colorScheme.primary),
           ),
 
           // Кнопка "Новый чат"

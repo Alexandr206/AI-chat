@@ -8,8 +8,7 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Глобальный контроллер темы
-  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+  static final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
 
   @override
   Widget build(BuildContext context) {
@@ -19,22 +18,39 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'AI Agent Chat',
           debugShowCheckedModeBanner: false,
-          // Светлая тема
+          
+          // --- СВЕТЛАЯ ТЕМА ---
           theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
             useMaterial3: true,
             brightness: Brightness.light,
-          ),
-          // Темная тема
-          darkTheme: ThemeData(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromARGB(255, 92, 8, 2), 
-              brightness: Brightness.dark
+              seedColor: Colors.blue,
+              brightness: Brightness.light,
             ),
+            scaffoldBackgroundColor: Colors.white,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent, // Убираем оттенок при скролле
+            ),
+          ),
+
+          // --- ТЕМНАЯ ТЕМА ---
+          darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.red,
+              brightness: Brightness.dark,
+              surface: const Color(0xFF1E1E1E), // Цвет поверхностей (карточек)
+            ),
+            scaffoldBackgroundColor: const Color(0xFF121212), // Основной фон (темно-серый)
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF121212),
+              surfaceTintColor: Colors.transparent,
+            ),
           ),
-          themeMode: currentMode, // Текущий режим
+          
+          themeMode: currentMode,
           home: const ChatScreen(),
         );
       },

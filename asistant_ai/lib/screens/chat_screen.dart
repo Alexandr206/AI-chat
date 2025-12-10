@@ -3,7 +3,7 @@ import '../models/chat_message.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/message_bubble.dart';
-// Импортируем сервисы
+import '../widgets/settings_dialog.dart'; // Импорт нового диалога
 import '../services/giga_chat_service.dart';
 import '../services/open_router_service.dart';
 
@@ -18,14 +18,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = [];
   bool _isAiTyping = false;
   
-  // Настройки (в реальном приложении хранить в SharedPreferences)
-  String _selectedProvider = 'OpenRouter'; // 'OpenRouter' или 'GigaChat'
-  
-  // !!! ЗАМЕНИ ЭТО НА СВОИ КЛЮЧИ ИЛИ ВВОДИ ЧЕРЕЗ UI !!!
-  // Для OpenRouter ключ начинается с sk-or-...
-  final String _openRouterKey = "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"; 
-  // Для GigaChat нужен Client Secret/Auth Key (длинная строка base64)
-  final String _gigaChatAuthKey = "MDE5OWYyMWMtOGU5Mi03ZmNjLThlYWItNjNkM2JmMDg3Y2NlOmJiYjAxM2RjLTJlOWQtNDQyNC1iNGM5LWI2MTc5MzYzNmYwYg=="; 
+  // Состояние: выбранный провайдер
+  String _selectedProvider = 'OpenRouter'; 
+
+  // --- КЛЮЧИ API (Лучше вынести в .env или SecureStorage) ---
+  final String _openRouterKey = "sk-or-v1-YOUR-KEY"; 
+  final String _gigaChatAuthKey = "YOUR-AUTH-KEY"; 
 
   void _addMessage(String text, bool isUser) {
     setState(() {
@@ -37,9 +35,7 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  // Конвертация истории чата для API
   List<Map<String, String>> _getHistoryForApi() {
-    // Берем последние 10 сообщений, переворачиваем (так как у нас reverse list), форматируем
     return _messages.take(10).toList().reversed.map((m) {
       return {
         "role": m.isUser ? "user" : "assistant",
@@ -63,7 +59,7 @@ class _ChatScreenState extends State<ChatScreen> {
         responseText = await service.sendMessage(text, _getHistoryForApi());
       }
     } catch (e) {
-      responseText = "Произошла ошибка: $e";
+      responseText = "Ошибка: $e";
     }
 
     if (mounted) {
@@ -72,14 +68,20 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Метод для смены провайдера через Drawer (передадим его как callback)
-  void _changeProvider(String provider) {
-    setState(() {
-      _selectedProvider = provider;
-    });
-    Navigator.pop(context); // Закрыть меню
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Выбран провайдер: $provider")),
+  // Функция открытия диалога настроек
+  void _openSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SettingsDialog(
+          currentProvider: _selectedProvider,
+          onProviderChanged: (newProvider) {
+            setState(() {
+              _selectedProvider = newProvider;
+            });
+          },
+        );
+      },
     );
   }
 
@@ -90,8 +92,9 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Text("AI Чат ($_selectedProvider)"),
         centerTitle: true,
       ),
-      // Передаем функцию смены провайдера в Drawer
-      drawer: AppDrawer(onProviderChanged: _changeProvider), 
+      drawer: AppDrawer(
+        onOpenSettings: _openSettingsDialog, // Передаем функцию открытия настроек
+      ),
       body: Column(
         children: [
           Expanded(

@@ -1,6 +1,6 @@
 class ChatMessage {
   final String text;
-  final bool isUser; // true если от пользователя, false если от ИИ
+  final bool isUser;
   final DateTime timestamp;
 
   ChatMessage({
@@ -8,4 +8,22 @@ class ChatMessage {
     required this.isUser,
     required this.timestamp,
   });
+
+  // Преобразование в Map (JSON)
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+      'isUser': isUser,
+      'timestamp': timestamp.toIso8601String(),
+    };
+  }
+
+  // Создание объекта из Map (JSON)
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      text: json['text'],
+      isUser: json['isUser'],
+      timestamp: DateTime.parse(json['timestamp']),
+    );
+  }
 }

@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// Импорты виджетов и моделей
 import '../models/chat_message.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/message_bubble.dart';
 import '../widgets/settings_dialog.dart';
+
+// Импорты сервисов и конфига
 import '../services/giga_chat_service.dart';
 import '../services/open_router_service.dart';
 import '../services/chat_storage_service.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../config/open_router_config.dart'; // <-- ВАЖНО: Добавлен импорт конфига
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -24,9 +29,14 @@ class _ChatScreenState extends State<ChatScreen> {
   
   bool _isAiTyping = false;
   String _selectedProvider = 'OpenRouter';
+  
+  // --- НОВОЕ: Храним выбранную модель ---
+  // По умолчанию берем из конфига (Devstral)
+  String _selectedModel = OpenRouterConfig.defaultModel; 
 
   final ChatStorageService _storageService = ChatStorageService();
-  // Получаем ключи из .env. Если ключа нет, возвращаем пустую строку.
+  
+  // Получаем ключи из .env
   final String _openRouterKey = dotenv.env['OPENROUTER_API_KEY'] ?? ""; 
   final String _gigaChatAuthKey = dotenv.env['GIGACHAT_AUTH_KEY'] ?? "";
 
@@ -61,9 +71,8 @@ class _ChatScreenState extends State<ChatScreen> {
   // --- УДАЛЕНИЕ ЧАТА ---
   Future<void> _deleteChat(String chatId) async {
     await _storageService.deleteChat(chatId);
-    await _loadHistoryIndex(); // Обновить список
+    await _loadHistoryIndex(); 
     
-    // Если удалили тот чат, который сейчас открыт - сбрасываем в "Новый"
     if (_currentChatId == chatId) {
       _startNewChat();
     }
@@ -71,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   // --- ПЕРЕИМЕНОВАНИЕ ЧАТА ---
   void _renameCurrentChat() {
-    if (_currentChatId == null) return; // Нельзя переименовать несохраненный чат
+    if (_currentChatId == null) return;
 
     final currentTitle = _chatHistoryIndex[_currentChatId] ?? "Чат";
     final textController = TextEditingController(text: currentTitle);
@@ -94,7 +103,7 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () async {
               if (textController.text.trim().isNotEmpty) {
                 await _storageService.renameChat(_currentChatId!, textController.text.trim());
-                await _loadHistoryIndex(); // Обновить UI
+                await _loadHistoryIndex(); 
               }
               if (mounted) Navigator.pop(ctx);
             },
@@ -120,9 +129,6 @@ class _ChatScreenState extends State<ChatScreen> {
       _currentChatId = const Uuid().v4();
     }
 
-    // Сохраняем. Внимание: внутри saveChat мы добавили логику, 
-    // чтобы название обновлялось только для новых чатов (onlyIfNew: true),
-    // чтобы не затирать ручное переименование.
     _storageService.saveChat(_currentChatId!, _messages.reversed.toList()).then((_) {
       if (!_chatHistoryIndex.containsKey(_currentChatId)) {
         _loadHistoryIndex();
@@ -130,7 +136,6 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  // ... (методы _getHistoryForApi и _handleSubmitted без изменений) ...
   List<Map<String, String>> _getHistoryForApi() {
     return _messages.take(10).toList().reversed.map((m) {
       return {
@@ -140,6 +145,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }).toList();
   }
 
+  // --- ОТПРАВКА СООБЩЕНИЯ ---
   void _handleSubmitted(String text) async {
     _addMessage(text, true);
     setState(() => _isAiTyping = true);
@@ -148,7 +154,8 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       if (_selectedProvider == 'OpenRouter') {
         final service = OpenRouterService(_openRouterKey);
-        responseText = await service.sendMessage(text, _getHistoryForApi());
+        // !!! ВАЖНО: Передаем _selectedModel в сервис
+        responseText = await service.sendMessage(text, _selectedModel, _getHistoryForApi());
       } else {
         final service = GigaChatService(_gigaChatAuthKey);
         responseText = await service.sendMessage(text, _getHistoryForApi());
@@ -163,15 +170,22 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  // --- ОТКРЫТИЕ НАСТРОЕК ---
   void _openSettingsDialog() {
     showDialog(
       context: context,
       builder: (context) {
         return SettingsDialog(
           currentProvider: _selectedProvider,
+          currentModel: _selectedModel, // <-- Передаем текущую модель
           onProviderChanged: (newProvider) {
             setState(() {
               _selectedProvider = newProvider;
+            });
+          },
+          onModelChanged: (newModel) { // <-- Обрабатываем смену модели
+            setState(() {
+              _selectedModel = newModel;
             });
           },
         );
@@ -181,7 +195,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Определяем название текущего чата
     String chatTitle = "Новый чат";
     if (_currentChatId != null && _chatHistoryIndex.containsKey(_currentChatId)) {
       chatTitle = _chatHistoryIndex[_currentChatId]!;
@@ -190,9 +203,8 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        // Кастомный заголовок с названием и провайдером
         title: InkWell(
-          onTap: _currentChatId == null ? null : _renameCurrentChat, // Клик только если чат создан
+          onTap: _currentChatId == null ? null : _renameCurrentChat,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
@@ -211,10 +223,13 @@ class _ChatScreenState extends State<ChatScreen> {
                        Icon(Icons.edit, size: 14, color: Colors.grey.withOpacity(0.7))
                   ],
                 ),
+                // Показываем Провайдера. Можно добавить и модель, если название не слишком длинное
                 Text(
-                  _selectedProvider, // Показываем выбранный ИИ
+                  _selectedProvider == 'OpenRouter' 
+                      ? "$_selectedProvider (${OpenRouterConfig.availableModels[_selectedModel]?.split(' ').first ?? 'Model'})"
+                      : _selectedProvider,
                   style: TextStyle(
-                    fontSize: 12, 
+                    fontSize: 11, 
                     color: Theme.of(context).colorScheme.primary, 
                     fontWeight: FontWeight.w500
                   ),
@@ -228,7 +243,7 @@ class _ChatScreenState extends State<ChatScreen> {
         onOpenSettings: _openSettingsDialog,
         onNewChat: _startNewChat,
         onLoadChat: _loadChat,
-        onDeleteChat: _deleteChat, // Передаем функцию удаления
+        onDeleteChat: _deleteChat,
         chatHistory: _chatHistoryIndex,
       ),
       body: Column(
@@ -237,7 +252,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: _messages.isEmpty 
             ? Center(
                 child: Text(
-                  "Начните общение с AI\n(Модель: $_selectedProvider)",
+                  "Начните общение с AI\n(Модель: $_selectedModel)", // Отображаем модель на пустом экране
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.grey),
                 ),
@@ -257,7 +272,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: LinearProgressIndicator(),
             ),
           SafeArea(
-            top: false, // Сверху отступ не нужен (там AppBar)
+            top: false, 
             child: ChatInput(
               onSendMessage: _handleSubmitted,
               isTyping: _isAiTyping,

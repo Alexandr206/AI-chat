@@ -4,7 +4,7 @@ class AppDrawer extends StatelessWidget {
   final VoidCallback onOpenSettings;
   final VoidCallback onNewChat;
   final Function(String) onLoadChat;
-  final Function(String) onDeleteChat; // Callback удаления
+  final Function(String) onDeleteChat;
   final Map<String, String> chatHistory;
 
   const AppDrawer({
@@ -16,7 +16,6 @@ class AppDrawer extends StatelessWidget {
     required this.chatHistory,
   });
 
-  // Метод показа диалога подтверждения
   void _confirmDelete(BuildContext context, String chatId, String title) {
     showDialog(
       context: context,
@@ -30,8 +29,8 @@ class AppDrawer extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(ctx); // Закрыть диалог
-              onDeleteChat(chatId); // Вызвать удаление
+              Navigator.pop(ctx);
+              onDeleteChat(chatId);
             },
             child: const Text("Удалить", style: TextStyle(color: Colors.red)),
           ),
@@ -47,61 +46,66 @@ class AppDrawer extends StatelessWidget {
 
     return Drawer(
       backgroundColor: theme.scaffoldBackgroundColor,
-      child: Column(
-        children: [
-          UserAccountsDrawerHeader(
-            accountName: const Text("AI Assistant"),
-            accountEmail: const Text("История переписок"),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: theme.colorScheme.surface,
-              child: Icon(Icons.smart_toy, size: 40, color: theme.colorScheme.primary),
-            ),
-            decoration: BoxDecoration(color: theme.colorScheme.primary),
-          ),
-          ListTile(
-            leading: const Icon(Icons.add_comment_outlined, color: Colors.green),
-            title: const Text('Новый чат', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-            onTap: () {
-              Navigator.pop(context);
-              onNewChat();
-            },
-          ),
-          const Divider(),
-          Expanded(
-            child: chatIds.isEmpty 
-            ? const Center(child: Text("Пока нет истории"))
-            : ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: chatIds.length,
-                itemBuilder: (context, index) {
-                  final id = chatIds[index];
-                  final title = chatHistory[id] ?? "Чат";
-                  return ListTile(
-                    title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-                    onTap: () {
-                      Navigator.pop(context);
-                      onLoadChat(id);
-                    },
-                    // Кнопка удаления справа
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: Colors.grey),
-                      onPressed: () => _confirmDelete(context, id, title),
-                    ),
-                  );
-                },
+      // !!! ВАЖНО: Оборачиваем содержимое в SafeArea
+      child: SafeArea(
+        top: false, // Сверху не отступаем (чтобы цвет шапки был до самого верха)
+        bottom: true, // Снизу отступаем (чтобы настройки не перекрывались шторкой)
+        child: Column(
+          children: [
+            UserAccountsDrawerHeader(
+              accountName: const Text("AI Assistant"),
+              accountEmail: const Text("История переписок"),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: theme.colorScheme.surface,
+                child: Icon(Icons.smart_toy, size: 40, color: theme.colorScheme.primary),
               ),
-          ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Настройки'),
-            onTap: () {
-              Navigator.pop(context);
-              onOpenSettings();
-            },
-          ),
-          const SizedBox(height: 10),
-        ],
+              decoration: BoxDecoration(color: theme.colorScheme.primary),
+            ),
+            ListTile(
+              leading: const Icon(Icons.add_comment_outlined, color: Colors.green),
+              title: const Text('Новый чат', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+              onTap: () {
+                Navigator.pop(context);
+                onNewChat();
+              },
+            ),
+            const Divider(),
+            Expanded(
+              child: chatIds.isEmpty
+                  ? const Center(child: Text("Пока нет истории"))
+                  : ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: chatIds.length,
+                      itemBuilder: (context, index) {
+                        final id = chatIds[index];
+                        final title = chatHistory[id] ?? "Чат";
+                        return ListTile(
+                          title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          onTap: () {
+                            Navigator.pop(context);
+                            onLoadChat(id);
+                          },
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                            onPressed: () => _confirmDelete(context, id, title),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Настройки'),
+              onTap: () {
+                Navigator.pop(context);
+                onOpenSettings();
+              },
+            ),
+            // Небольшой отступ снизу на всякий случай
+            const SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }

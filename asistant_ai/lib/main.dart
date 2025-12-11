@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; 
 import 'screens/chat_screen.dart';
 
-void main() {
+
+// Добавляем async, так как загрузка файла - асинхронная операция
+Future<void> main() async {
+  // Гарантируем инициализацию движка Flutter
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Загружаем ключи из файла .env
+  // Если файла нет, создаем пустой map, чтобы приложение не упало
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Внимание: Файл .env не найден. Используются пустые ключи.");
+  }
+
   runApp(const MyApp());
 }
 

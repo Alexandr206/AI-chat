@@ -3,16 +3,42 @@ import 'package:flutter/material.dart';
 class AppDrawer extends StatelessWidget {
   final VoidCallback onOpenSettings;
   final VoidCallback onNewChat;
-  final Function(String) onLoadChat; // Функция загрузки чата по ID
-  final Map<String, String> chatHistory; // Список чатов (ID -> Название)
+  final Function(String) onLoadChat;
+  final Function(String) onDeleteChat; // Callback удаления
+  final Map<String, String> chatHistory;
 
   const AppDrawer({
     super.key,
     required this.onOpenSettings,
     required this.onNewChat,
     required this.onLoadChat,
+    required this.onDeleteChat,
     required this.chatHistory,
   });
+
+  // Метод показа диалога подтверждения
+  void _confirmDelete(BuildContext context, String chatId, String title) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Удаление чата"),
+        content: Text("Вы уверены, что хотите удалить чат \"$title\"?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Отмена"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Закрыть диалог
+              onDeleteChat(chatId); // Вызвать удаление
+            },
+            child: const Text("Удалить", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +46,7 @@ class AppDrawer extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Drawer(
-      backgroundColor: theme.scaffoldBackgroundColor, // Адаптивный фон
+      backgroundColor: theme.scaffoldBackgroundColor,
       child: Column(
         children: [
           UserAccountsDrawerHeader(
@@ -32,8 +58,6 @@ class AppDrawer extends StatelessWidget {
             ),
             decoration: BoxDecoration(color: theme.colorScheme.primary),
           ),
-
-          // Кнопка "Новый чат"
           ListTile(
             leading: const Icon(Icons.add_comment_outlined, color: Colors.green),
             title: const Text('Новый чат', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
@@ -42,19 +66,7 @@ class AppDrawer extends StatelessWidget {
               onNewChat();
             },
           ),
-          
           const Divider(),
-          
-          // Заголовок списка
-          const Padding(
-            padding: EdgeInsets.only(left: 16.0, top: 8.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text("История:", style: TextStyle(color: Colors.grey)),
-            ),
-          ),
-
-          // Список истории (занимает всё свободное место)
           Expanded(
             child: chatIds.isEmpty 
             ? const Center(child: Text("Пока нет истории"))
@@ -65,20 +77,21 @@ class AppDrawer extends StatelessWidget {
                   final id = chatIds[index];
                   final title = chatHistory[id] ?? "Чат";
                   return ListTile(
-                    leading: const Icon(Icons.chat_bubble_outline, size: 20),
                     title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
                     onTap: () {
                       Navigator.pop(context);
                       onLoadChat(id);
                     },
+                    // Кнопка удаления справа
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                      onPressed: () => _confirmDelete(context, id, title),
+                    ),
                   );
                 },
               ),
           ),
-
           const Divider(),
-
-          // Кнопка настроек в самом низу
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Настройки'),
@@ -87,7 +100,7 @@ class AppDrawer extends StatelessWidget {
               onOpenSettings();
             },
           ),
-          const SizedBox(height: 10), // Отступ снизу
+          const SizedBox(height: 10),
         ],
       ),
     );

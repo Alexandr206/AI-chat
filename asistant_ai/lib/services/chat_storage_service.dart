@@ -53,6 +53,16 @@ class ChatStorageService {
 
     await prefs.setString(_historyKey, jsonEncode(history));
   }
+
+  Future<void> renameChat(String chatId, String newTitle) async {
+    final prefs = await SharedPreferences.getInstance();
+    final history = await getChatHistoryIndex();
+    
+    if (history.containsKey(chatId)) {
+      history[chatId] = newTitle;
+      await prefs.setString(_historyKey, jsonEncode(history));
+    }
+  }
   
   // Удаление чата (опционально)
   Future<void> deleteChat(String chatId) async {

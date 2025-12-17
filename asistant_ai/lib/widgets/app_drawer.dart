@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/graph_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final VoidCallback onOpenSettings;
@@ -67,6 +68,17 @@ class AppDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.pop(context);
                 onNewChat();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.hub_outlined, color: Colors.purple), // Иконка графа
+              title: const Text('Граф Знаний', style: TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.pop(context); // Закрываем меню
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GraphScreen()),
+                );
               },
             ),
             const Divider(),

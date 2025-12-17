@@ -125,9 +125,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _messages.insert(0, newMessage);
     });
 
-    if (_currentChatId == null) {
-      _currentChatId = const Uuid().v4();
-    }
+    _currentChatId ??= const Uuid().v4();
 
     _storageService.saveChat(_currentChatId!, _messages.reversed.toList()).then((_) {
       if (!_chatHistoryIndex.containsKey(_currentChatId)) {

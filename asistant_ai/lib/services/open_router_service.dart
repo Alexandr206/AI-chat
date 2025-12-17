@@ -8,12 +8,16 @@ class OpenRouterService {
   OpenRouterService(this.apiKey);
 
   // Добавляем аргумент model
-  Future<String?> sendMessage(String message, String model, List<Map<String, String>> history) async {
+  // Добавили аргумент systemPrompt
+  Future<String?> sendMessage(
+      String message, 
+      String model, 
+      List<Map<String, String>> history, 
+      String systemPrompt // <--- НОВЫЙ АРГУМЕНТ
+  ) async {
     const String url = "https://openrouter.ai/api/v1/chat/completions";
 
     try {
-      debugPrint("--- Запрос к OpenRouter ($model) ---");
-      
       final response = await http.post(
         Uri.parse(url),
         headers: {
@@ -23,9 +27,10 @@ class OpenRouterService {
           "X-Title": "Flutter AI App",
         },
         body: jsonEncode({
-          "model": model, // Используем выбранную модель
+          "model": model,
           "messages": [
-             {"role": "system", "content": "Ты полезный AI ассистент."},
+             // Вставляем загруженный промпт
+             {"role": "system", "content": systemPrompt},
              ...history,
              {"role": "user", "content": message}
           ],

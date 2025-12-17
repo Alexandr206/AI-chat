@@ -64,6 +64,10 @@ flutter:
 
   assets:
     - .env
+    - assets/knowledge_base/incose_full.ttl
+    - assets/knowledge_base/prompt.txt
+    - assets/knowledge_base/incose_graph_pro.html
+    - assets/knowledge_base/ontology.txt
 
   # To add assets to your application, add an assets section, like this:
   # assets:

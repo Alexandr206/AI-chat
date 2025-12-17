@@ -37,13 +37,12 @@ class GigaChatService {
           "RqUID": uuid,
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: {"scope": "GIGACHAT_API_PERS"}, // Или GIGACHAT_API_CORP, если ты юрлицо
+        body: {"scope": "GIGACHAT_API_PERS"}, 
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _accessToken = data['access_token'];
-        // Токен живет 30 мин, ставим запас чтобы обновить раньше
         _tokenExpiresAt = DateTime.now().add(const Duration(minutes: 25)); 
       } else {
         throw Exception("Ошибка авторизации GigaChat: ${response.body}");
@@ -54,7 +53,12 @@ class GigaChatService {
   }
 
   // 2. Отправка сообщения
-  Future<String?> sendMessage(String message, List<Map<String, String>> history) async {
+  // !!! ОБНОВЛЕНО: Добавлен аргумент systemPrompt
+  Future<String?> sendMessage(
+      String message, 
+      List<Map<String, String>> history, 
+      String systemPrompt // <--- Сюда прилетит онтология и инструкции
+  ) async {
     try {
       await _authenticate();
       
@@ -62,7 +66,8 @@ class GigaChatService {
       final client = _createHttpClient();
 
       final List<Map<String, String>> messages = [
-        {"role": "system", "content": "Ты полезный помощник."},
+        // Вставляем динамический промпт вместо "Ты полезный помощник"
+        {"role": "system", "content": systemPrompt}, 
         ...history,
         {"role": "user", "content": message}
       ];
@@ -74,7 +79,7 @@ class GigaChatService {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          "model": "GigaChat", // Проверь актуальное название модели в доке
+          "model": "GigaChat", // GigaChat:latest или просто GigaChat
           "messages": messages,
           "temperature": 0.7
         }),

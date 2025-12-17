@@ -1,0 +1,350 @@
+@prefix : <http://incose.org/guide/ru#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://incose.org/guide/ru#> .
+
+<http://incose.org/guide/ru> rdf:type owl:Ontology ;
+                                rdfs:label "INCOSE Guide for Writing Requirements (Russian)" ;
+                                rdfs:comment "Онтология на основе 'Руководства по написанию требований INCOSE' (2017)."@ru .
+
+#################################################################
+#    Classes (Классы)
+#################################################################
+
+:Concept rdf:type owl:Class ;
+         rdfs:label "Концепция"@ru .
+
+:Characteristic rdf:type owl:Class ;
+                rdfs:subClassOf :Concept ;
+                rdfs:label "Характеристика качества"@ru ;
+                rdfs:comment "Свойство, которым должно обладать хорошее требование или набор требований."@ru .
+
+:Rule rdf:type owl:Class ;
+      rdfs:subClassOf :Concept ;
+      rdfs:label "Правило"@ru ;
+      rdfs:comment "Инструкция, которой нужно следовать при формулировании требования."@ru .
+
+:Attribute rdf:type owl:Class ;
+           rdfs:subClassOf :Concept ;
+           rdfs:label "Атрибут"@ru .
+
+#################################################################
+#    Properties (Свойства связей и данных)
+#################################################################
+
+:supportsCharacteristic rdf:type owl:ObjectProperty ;
+                        rdfs:domain :Rule ;
+                        rdfs:range :Characteristic ;
+                        rdfs:label "обеспечивает характеристику"@ru ;
+                        rdfs:comment "Указывает, на улучшение какой характеристики направлено правило."@ru .
+
+:hasRationale rdf:type owl:DatatypeProperty ;
+              rdfs:domain :Concept ;
+              rdfs:range xsd:string ;
+              rdfs:label "Обоснование"@ru .
+
+:hasGuidance rdf:type owl:DatatypeProperty ;
+             rdfs:domain :Concept ;
+             rdfs:range xsd:string ;
+             rdfs:label "Методические указания"@ru .
+
+:hasExample rdf:type owl:DatatypeProperty ;
+            rdfs:domain :Concept ;
+            rdfs:range xsd:string ;
+            rdfs:label "Пример"@ru .
+
+#################################################################
+#    Individuals: Characteristics (Характеристики C1-C14)
+#################################################################
+
+:C1 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C1 - Необходимость"@ru ;
+    rdfs:comment "Требование считается необходимым, только если в нем определена принципиально важная способность, характеристика, ограничение или качество."@ru ;
+    :hasRationale "Лишние требования — причина бесполезной работы, дополнительных затрат и неоправданного риска."@ru .
+
+:C2 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C2 - Адекватность уровню"@ru ;
+    rdfs:comment "Требование считается адекватным уровню, если его степень детализации и выражаемую им мысль уместно указывать на выбранном уровне сущности."@ru ;
+    :hasGuidance "В требование не следует включать больше информации, чем требуется для выбранного уровня. Не следует включать описание способов реализации (How)."@ru .
+
+:C3 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C3 - Однозначность"@ru ;
+    rdfs:comment "Требование считается однозначным, если его можно интерпретировать только одним образом."@ru ;
+    :hasRationale "Если каждая сторона понимает обязательство по-своему, соглашение не имеет смысла."@ru .
+
+:C4 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C4 - Полнота (требования)"@ru ;
+    rdfs:comment "Требование считают полным, если оно само по себе содержит достаточно данных для разработки целевой системы. Не требует дополнительных пояснений."@ru .
+
+:C5 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C5 - Простота"@ru ;
+    rdfs:comment "Требование считается простым, если в нем указано только одно обязательство (одна мысль)."@ru ;
+    :hasGuidance "Избегайте союзов 'и', 'или'. Одно требование - одно предложение."@ru .
+
+:C6 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C6 - Реализуемость (требования)"@ru ;
+    rdfs:comment "Требование считается реализуемым, если его можно реализовать с приемлемым риском в заданных ограничениях (бюджет, технологии, физика)."@ru .
+
+:C7 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C7 - Пригодность для верификации"@ru ;
+    rdfs:comment "Требование пригодно для верификации, если оно сформулировано так, что можно однозначно проверить его выполнение (тестированием, инспекцией и т.д.)."@ru .
+
+:C8 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C8 - Соответствие потребности"@ru ;
+    rdfs:comment "Требование соответствует потребности, если оно точно отражает потребность заинтересованной стороны, на основании которой было создано."@ru .
+
+:C9 rdf:type :Characteristic, owl:NamedIndividual ;
+    rdfs:label "C9 - Соответствие нормам"@ru ;
+    rdfs:comment "Требование соответствует нормам, если оно отвечает принятым стандартным паттернам и стилю написания."@ru .
+
+:C10 rdf:type :Characteristic, owl:NamedIndividual ;
+     rdfs:label "C10 - Полнота (набора)"@ru ;
+     rdfs:comment "Набор требований полон, если содержит все необходимые данные для разработки системы, удовлетворяющей потребности."@ru .
+
+:C11 rdf:type :Characteristic, owl:NamedIndividual ;
+     rdfs:label "C11 - Непротиворечивость"@ru ;
+     rdfs:comment "Набор непротиворечив, если требования в нем не конфликтуют и не пересекаются. Используются одинаковые термины."@ru .
+
+:C12 rdf:type :Characteristic, owl:NamedIndividual ;
+     rdfs:label "C12 - Реализуемость (набора)"@ru ;
+     rdfs:comment "Набор реализуем, если его можно выполнить целиком в рамках ограничений (бюджет, сроки)."@ru .
+
+:C13 rdf:type :Characteristic, owl:NamedIndividual ;
+     rdfs:label "C13 - Понятность"@ru ;
+     rdfs:comment "Набор понятен, если он содержит ясное описание ожиданий сущности."@ru .
+
+:C14 rdf:type :Characteristic, owl:NamedIndividual ;
+     rdfs:label "C14 - Валидируемость"@ru ;
+     rdfs:comment "Набор валидируем, если можно доказать, что его реализация приведет к удовлетворению потребностей."@ru .
+
+#################################################################
+#    Individuals: Rules (Правила R1-R44)
+#################################################################
+
+# --- Точность ---
+
+:R1 rdf:type :Rule, owl:NamedIndividual ;
+    rdfs:label "R1 - Применять определенные артикли"@ru ;
+    rdfs:comment "В формулировке следует применять определенный артикль (the), избегать неопределенного (a/an). Для русского языка: явно указывать на конкретную сущность."@ru ;
+    :hasExample "Плохо: Система должна показывать время. Хорошо: Система должна показывать Текущее_Время."@ru ;
+    :supportsCharacteristic :C3, :C7 .
+
+:R2 rdf:type :Rule, owl:NamedIndividual ;
+    rdfs:label "R2 - Применять активный залог"@ru ;
+    rdfs:comment "Сущность, к которой предъявляется требование (подлежащее), должна быть явно обозначена и должна совершать действие."@ru ;
+    :hasRationale "При пассивном залоге неясно, кто выполняет действие."@ru ;
+    :supportsCharacteristic :C2, :C3, :C7 .
+
+:R3 rdf:type :Rule, owl:NamedIndividual ;
+    rdfs:label "R3 - Адекватное уровню подлежащее"@ru ;
+    rdfs:comment "Подлежащее должно соответствовать уровню системы (Бизнес -> Система -> Подсистема)."@ru ;
+    :supportsCharacteristic :C2, :C3, :C7, :C10, :C14 .
+
+:R4 rdf:type :Rule, owl:NamedIndividual ;
+    rdfs:label "R4 - Применять установленные термины"@ru ;
+    rdfs:comment "Следует определять термины в глоссарии и использовать их единообразно."@ru ;
+    :supportsCharacteristic :C3, :C7, :C11, :C13, :C14 .
+
+:R6 rdf:type :Rule, owl:NamedIndividual ;
+    rdfs:label "R6 - Указывать единицы измерения"@ru ;
+    rdfs:comment "Каждое числовое значение следует дополнять единицей измерения."@ru ;
+    :hasRationale "Отсутствие единиц измерения делает требование неоднозначным (метры или футы?)."@ru ;
+    :hasExample "Плохо: Температура ниже 30. Хорошо: Температура ниже 30 градусов Цельсия."@ru ;
+    :supportsCharacteristic :C3, :C4, :C7, :C8 .
+
+:R7 rdf:type :Rule, owl:NamedIndividual ;
+    rdfs:label "R7 - Избегать неточных терминов"@ru ;
+    rdfs:comment "Избегать слов: несколько, быстро, нормально, гибкий, удобный, примерно."@ru ;
+    :supportsCharacteristic :C3, :C4, :C7 .
+
+:R9 rdf:type :Rule, owl:NamedIndividual ;
+    rdfs:label "R9 - Избегать снимающих ответственность выражений"@ru ;
+    rdfs:comment "Избегать фраз: 'при необходимости', 'по возможности', 'насколько это целесообразно'."@ru ;
+    :supportsCharacteristic :C3, :C4, :C7 .
+
+:R10 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R10 - Выражать мысль исчерпывающе"@ru ;
+     rdfs:comment "Не использовать 'и т.д.', 'и прочее'. Списки должны быть закрытыми."@ru ;
+     :supportsCharacteristic :C3, :C4, :C5, :C7 .
+
+# --- Краткость ---
+
+:R11 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R11 - Избегать нанизывания глаголов"@ru ;
+     rdfs:comment "Избегать конструкций 'должна обладать способностью', 'быть способна'. Пишите прямо: 'Система должна...'."@ru ;
+     :supportsCharacteristic :C3, :C7 .
+
+:R12 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R12 - Разделять предложения"@ru ;
+     rdfs:comment "Одно требование - одно предложение, одна мысль."@ru ;
+     :supportsCharacteristic :C3 .
+
+# --- Однозначность ---
+
+:R13 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R13 - Соблюдать грамматику"@ru ;
+     rdfs:comment "Соблюдать правила грамматики языка."@ru ;
+     :supportsCharacteristic :C3, :C9 .
+
+:R14 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R14 - Соблюдать орфографию"@ru ;
+     rdfs:comment "Избегать опечаток."@ru ;
+     :supportsCharacteristic :C3 .
+
+:R15 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R15 - Соблюдать пунктуацию"@ru ;
+     rdfs:comment "Правильная пунктуация критична для понимания смысла."@ru ;
+     :supportsCharacteristic :C3 .
+
+:R16 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R16 - Выделять логические операторы"@ru ;
+     rdfs:comment "Явно выделять И, ИЛИ, НЕ (например, заглавными буквами). Избегать 'и/или'."@ru ;
+     :supportsCharacteristic :C3 .
+
+:R17 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R17 - Избегать частицы 'Не'"@ru ;
+     rdfs:comment "Избегать отрицаний. Отрицание 'не должно' часто невозможно верифицировать (требует бесконечной проверки)."@ru ;
+     :hasExample "Плохо: Система не должна падать. Хорошо: Система должна работать 99% времени."@ru ;
+     :supportsCharacteristic :C3, :C7 .
+
+:R18 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R18 - Избегать косой черты"@ru ;
+     rdfs:comment "Знак '/' неоднозначен (это 'и' или 'или'?)."@ru ;
+     :supportsCharacteristic :C3 .
+
+# --- Простота ---
+
+:R19 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R19 - Формулировать одним предложением"@ru ;
+     rdfs:comment "Одна мысль в одном предложении."@ru ;
+     :supportsCharacteristic :C3, :C5, :C9 .
+
+:R20 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R20 - Избегать союзов"@ru ;
+     rdfs:comment "Союзы 'и', 'или' часто объединяют два разных требования. Разделите их."@ru ;
+     :supportsCharacteristic :C3, :C5 .
+
+:R22 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R22 - Не указывать назначение внутри требования"@ru ;
+     rdfs:comment "Не пишите 'для того чтобы...'. Используйте поле Обоснование."@ru ;
+     :supportsCharacteristic :C5 .
+
+:R23 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R23 - Не использовать скобки"@ru ;
+     rdfs:comment "Текст в скобках часто является лишним или неоднозначным."@ru ;
+     :supportsCharacteristic :C5 .
+
+:R24 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R24 - Перечислять явно"@ru ;
+     rdfs:comment "Не используйте обобщающие слова, перечисляйте требования отдельными пунктами."@ru ;
+     :supportsCharacteristic :C3, :C5 .
+
+:R25 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R25 - Указывать контекст (ссылка)"@ru ;
+     rdfs:comment "Для сложного поведения ссылайтесь на диаграммы/модели."@ru ;
+     :supportsCharacteristic :C3, :C5 .
+
+# --- Полнота ---
+
+:R26 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R26 - Избегать местоимений"@ru ;
+     rdfs:comment "Не используйте 'он', 'это', 'их'. Повторяйте существительное."@ru ;
+     :supportsCharacteristic :C3, :C4, :C7 .
+
+:R27 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R27 - Не полагаться на заголовки"@ru ;
+     rdfs:comment "Требование должно быть понятным без прочтения заголовка раздела."@ru ;
+     :supportsCharacteristic :C4 .
+
+# --- Реалистичность ---
+
+:R28 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R28 - Не употреблять абсолютные обороты"@ru ;
+     rdfs:comment "Избегать слов: всегда, никогда, 100% надежность. Это недостижимо."@ru ;
+     :supportsCharacteristic :C6, :C7, :C12 .
+
+# --- Условия ---
+
+:R29 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R29 - Явно указывать применимость"@ru ;
+     rdfs:comment "Условия (когда, где) должны быть в тексте требования."@ru ;
+     :supportsCharacteristic :C4, :C7 .
+
+:R30 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R30 - Логика условий"@ru ;
+     rdfs:comment "Явно указывать логику (И/ИЛИ) для списка условий."@ru ;
+     :supportsCharacteristic :C3, :C7 .
+
+# --- Уникальность ---
+
+:R31 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R31 - Классифицировать требования"@ru ;
+     rdfs:comment "Использовать атрибуты типа/категории."@ru ;
+     :supportsCharacteristic :C10, :C11, :C12 .
+
+:R32 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R32 - Записывать один раз"@ru ;
+     rdfs:comment "Избегать дубликатов."@ru ;
+     :supportsCharacteristic :C1, :C9, :C11, :C12 .
+
+# --- Абстракция ---
+
+:R33 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R33 - Не указывать решение"@ru ;
+     rdfs:comment "Писать 'ЧТО' нужно, а не 'КАК' реализовать. (What, not How)."@ru ;
+     :supportsCharacteristic :C2 .
+
+# --- Прочее ---
+
+:R34 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R34 - Использовать 'Каждый'"@ru ;
+     rdfs:comment "Вместо 'все' или 'любой' использовать 'каждый' для однозначности."@ru ;
+     :supportsCharacteristic :C3, :C7, :C8 .
+
+:R35 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R35 - Указывать диапазон значений (Допуск)"@ru ;
+     rdfs:comment "Указывать допустимые отклонения (±) или диапазоны, а не просто точные числа."@ru ;
+     :supportsCharacteristic :C3, :C6, :C7, :C8, :C10, :C12 .
+
+:R36 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R36 - Измеримые величины"@ru ;
+     rdfs:comment "Значения должны быть измеримыми."@ru ;
+     :supportsCharacteristic :C3, :C7, :C10, :C12 .
+
+:R37 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R37 - Время количественно"@ru ;
+     rdfs:comment "Не использовать 'быстро', 'мгновенно'. Указывать секунды/миллисекунды."@ru ;
+     :supportsCharacteristic :C3, :C7, :C10 .
+
+:R38 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R38 - Установленные термины (в наборе)"@ru ;
+     rdfs:comment "Один термин - одно значение во всем наборе."@ru ;
+     :supportsCharacteristic :C3, :C8, :C9, :C11, :C13, :C14 .
+
+:R39 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R39 - Аббревиатуры"@ru ;
+     rdfs:comment "Использовать аббревиатуры единообразно согласно списку."@ru ;
+     :supportsCharacteristic :C3, :C9, :C11, :C13, :C14 .
+
+:R40 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R40 - Избегать сокращений"@ru ;
+     rdfs:comment "Не сокращать слова в тексте требования."@ru ;
+     :supportsCharacteristic :C11, :C13, :C14 .
+
+:R41 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R41 - Руководство по стилю"@ru ;
+     rdfs:comment "Использовать единый стиль проекта."@ru ;
+     :supportsCharacteristic :C5, :C9, :C11, :C13, :C14 .
+
+:R43 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R43 - Группировать связанные"@ru ;
+     rdfs:comment "Связанные требования должны быть рядом."@ru ;
+     :supportsCharacteristic :C9, :C11, :C13 .
+
+:R44 rdf:type :Rule, owl:NamedIndividual ;
+     rdfs:label "R44 - Типовая структура"@ru ;
+     rdfs:comment "Использовать паттерны и шаблоны."@ru ;
+     :supportsCharacteristic :C10, :C11, :C13, :C14 .

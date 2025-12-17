@@ -13,7 +13,8 @@ import '../widgets/settings_dialog.dart';
 import '../services/giga_chat_service.dart';
 import '../services/open_router_service.dart';
 import '../services/chat_storage_service.dart';
-import '../config/open_router_config.dart'; // <-- ВАЖНО: Добавлен импорт конфига
+import '../services/prompt_service.dart'; // <-- НОВЫЙ ИМПОРТ
+import '../config/open_router_config.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -30,12 +31,15 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isAiTyping = false;
   String _selectedProvider = 'OpenRouter';
   
-  // --- НОВОЕ: Храним выбранную модель ---
-  // По умолчанию берем из конфига (Devstral)
+  // Храним выбранную модель
   String _selectedModel = OpenRouterConfig.defaultModel; 
 
   final ChatStorageService _storageService = ChatStorageService();
   
+  // --- НОВОЕ: Сервис для загрузки промптов ---
+  final PromptService _promptService = PromptService();
+  String _fullSystemPrompt = "Ты полезный ассистент."; // Значение по умолчанию
+
   // Получаем ключи из .env
   final String _openRouterKey = dotenv.env['OPENROUTER_API_KEY'] ?? ""; 
   final String _gigaChatAuthKey = dotenv.env['GIGACHAT_AUTH_KEY'] ?? "";
@@ -44,6 +48,17 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     _loadHistoryIndex();
+    _loadSystemPrompt(); // <-- Загружаем системный промпт при старте
+  }
+
+  // --- НОВОЕ: Метод загрузки промпта ---
+  Future<void> _loadSystemPrompt() async {
+    final prompt = await _promptService.getFullSystemPrompt();
+    if (mounted) {
+      setState(() {
+        _fullSystemPrompt = prompt;
+      });
+    }
   }
 
   Future<void> _loadHistoryIndex() async {
@@ -152,11 +167,22 @@ class _ChatScreenState extends State<ChatScreen> {
     try {
       if (_selectedProvider == 'OpenRouter') {
         final service = OpenRouterService(_openRouterKey);
-        // !!! ВАЖНО: Передаем _selectedModel в сервис
-        responseText = await service.sendMessage(text, _selectedModel, _getHistoryForApi());
+        // !!! ВАЖНО: Передаем _fullSystemPrompt в сервис
+        responseText = await service.sendMessage(
+          text, 
+          _selectedModel, 
+          _getHistoryForApi(),
+          _fullSystemPrompt // <-- Передаем загруженный промпт + онтологию
+        );
       } else {
         final service = GigaChatService(_gigaChatAuthKey);
-        responseText = await service.sendMessage(text, _getHistoryForApi());
+        // !!! ВАЖНО: Передаем _fullSystemPrompt в сервис GigaChat
+        // (Убедись, что GigaChatService тоже обновлен для приема этого аргумента)
+        responseText = await service.sendMessage(
+          text, 
+          _getHistoryForApi(),
+          _fullSystemPrompt // <-- Передаем загруженный промпт + онтологию
+        );
       }
     } catch (e) {
       responseText = "Ошибка: $e";
@@ -175,13 +201,13 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (context) {
         return SettingsDialog(
           currentProvider: _selectedProvider,
-          currentModel: _selectedModel, // <-- Передаем текущую модель
+          currentModel: _selectedModel,
           onProviderChanged: (newProvider) {
             setState(() {
               _selectedProvider = newProvider;
             });
           },
-          onModelChanged: (newModel) { // <-- Обрабатываем смену модели
+          onModelChanged: (newModel) {
             setState(() {
               _selectedModel = newModel;
             });
@@ -221,7 +247,6 @@ class _ChatScreenState extends State<ChatScreen> {
                        Icon(Icons.edit, size: 14, color: Colors.grey.withOpacity(0.7))
                   ],
                 ),
-                // Показываем Провайдера. Можно добавить и модель, если название не слишком длинное
                 Text(
                   _selectedProvider == 'OpenRouter' 
                       ? "$_selectedProvider (${OpenRouterConfig.availableModels[_selectedModel]?.split(' ').first ?? 'Model'})"
@@ -250,7 +275,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: _messages.isEmpty 
             ? Center(
                 child: Text(
-                  "Начните общение с AI\n(Модель: $_selectedModel)", // Отображаем модель на пустом экране
+                  "Начните общение с AI\n(Модель: $_selectedModel)",
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.grey),
                 ),

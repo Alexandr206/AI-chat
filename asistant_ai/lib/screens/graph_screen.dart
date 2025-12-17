@@ -16,27 +16,20 @@ class _GraphScreenState extends State<GraphScreen> {
   void initState() {
     super.initState();
 
-    // 10.0.2.2 - это "localhost" для Эмулятора Android
-    // Если запускаешь на реальном телефоне, вставь свой локальный IP (например 192.168.1.5)
-    const String graphUrl = 'http://10.0.2.2:8000/static/incose_graph_pro.html';
-
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
+      ..setBackgroundColor(const Color(0xFFFFFFFF)) // Белый фон
       ..setNavigationDelegate(
         NavigationDelegate(
-          onPageStarted: (String url) {},
           onPageFinished: (String url) {
             setState(() {
               _isLoading = false;
             });
           },
-          onWebResourceError: (WebResourceError error) {
-            debugPrint('Ошибка WebView: ${error.description}');
-          },
         ),
       )
-      ..loadRequest(Uri.parse(graphUrl));
+      // !!! ВАЖНО: Загружаем локальный ассет
+      ..loadFlutterAsset('assets/knowledge_base/incose_graph_pro.html');
   }
 
   @override

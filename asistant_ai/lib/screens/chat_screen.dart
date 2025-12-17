@@ -29,10 +29,14 @@ class _ChatScreenState extends State<ChatScreen> {
   Map<String, String> _chatHistoryIndex = {};
   
   bool _isAiTyping = false;
+
+  // --- НАСТРОЙКИ ---
   String _selectedProvider = 'OpenRouter';
-  
-  // Храним выбранную модель
   String _selectedModel = OpenRouterConfig.defaultModel; 
+  
+  // НОВОЕ: Режим промпта. По умолчанию 'analyst' (как было) или 'none'
+  String _selectedPromptMode = 'analyst'; 
+  
 
   final ChatStorageService _storageService = ChatStorageService();
   
@@ -43,6 +47,7 @@ class _ChatScreenState extends State<ChatScreen> {
   // Получаем ключи из .env
   final String _openRouterKey = dotenv.env['OPENROUTER_API_KEY'] ?? ""; 
   final String _gigaChatAuthKey = dotenv.env['GIGACHAT_AUTH_KEY'] ?? "";
+
 
   @override
   void initState() {
@@ -163,25 +168,32 @@ class _ChatScreenState extends State<ChatScreen> {
     _addMessage(text, true);
     setState(() => _isAiTyping = true);
 
+    // ВЫБОР ПРОМПТА В ЗАВИСИМОСТИ ОТ НАСТРОЙКИ
+    String systemPromptToUse;
+    if (_selectedPromptMode == 'analyst') {
+      // Используем загруженную онтологию и промпт аналитика
+      systemPromptToUse = _fullSystemPrompt;
+    } else {
+      // Режим "Нет" (обычный чат)
+      systemPromptToUse = "Ты полезный и вежливый AI помощник. Отвечай кратко и по делу.";
+    }
+
     String? responseText;
     try {
       if (_selectedProvider == 'OpenRouter') {
         final service = OpenRouterService(_openRouterKey);
-        // !!! ВАЖНО: Передаем _fullSystemPrompt в сервис
         responseText = await service.sendMessage(
           text, 
           _selectedModel, 
           _getHistoryForApi(),
-          _fullSystemPrompt // <-- Передаем загруженный промпт + онтологию
+          systemPromptToUse // <-- Передаем выбранный промпт
         );
       } else {
         final service = GigaChatService(_gigaChatAuthKey);
-        // !!! ВАЖНО: Передаем _fullSystemPrompt в сервис GigaChat
-        // (Убедись, что GigaChatService тоже обновлен для приема этого аргумента)
         responseText = await service.sendMessage(
           text, 
           _getHistoryForApi(),
-          _fullSystemPrompt // <-- Передаем загруженный промпт + онтологию
+          systemPromptToUse // <-- Передаем выбранный промпт
         );
       }
     } catch (e) {
@@ -202,15 +214,16 @@ class _ChatScreenState extends State<ChatScreen> {
         return SettingsDialog(
           currentProvider: _selectedProvider,
           currentModel: _selectedModel,
+          currentPromptMode: _selectedPromptMode, // <-- Передаем текущий режим
+          
           onProviderChanged: (newProvider) {
-            setState(() {
-              _selectedProvider = newProvider;
-            });
+            setState(() => _selectedProvider = newProvider);
           },
           onModelChanged: (newModel) {
-            setState(() {
-              _selectedModel = newModel;
-            });
+            setState(() => _selectedModel = newModel);
+          },
+          onPromptModeChanged: (newMode) { // <-- Обработка смены режима
+            setState(() => _selectedPromptMode = newMode);
           },
         );
       },

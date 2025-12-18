@@ -5,19 +5,30 @@ import '../config/open_router_config.dart';
 class SettingsDialog extends StatefulWidget {
   final String currentProvider;
   final String currentModel;
-  final String currentPromptMode; // <-- НОВЫЙ ПАРАМЕТР
+  final String currentPromptMode;
+  
+  // Текущие ключи, чтобы отобразить их в полях
+  final String currentOpenRouterKey;
+  final String currentGigaChatKey;
+
   final Function(String) onProviderChanged;
   final Function(String) onModelChanged;
-  final Function(String) onPromptModeChanged; // <-- НОВЫЙ CALLBACK
+  final Function(String) onPromptModeChanged;
+  
+  // Новый callback для сохранения ключа
+  final Function(String provider, String newKey) onKeyChanged;
 
   const SettingsDialog({
     super.key,
     required this.currentProvider,
     required this.currentModel,
     required this.currentPromptMode,
+    required this.currentOpenRouterKey,
+    required this.currentGigaChatKey,
     required this.onProviderChanged,
     required this.onModelChanged,
     required this.onPromptModeChanged,
+    required this.onKeyChanged,
   });
 
   @override
@@ -27,7 +38,13 @@ class SettingsDialog extends StatefulWidget {
 class _SettingsDialogState extends State<SettingsDialog> {
   late String _selectedProvider;
   late String _selectedModel;
-  late String _selectedPromptMode; // <-- Локальное состояние
+  late String _selectedPromptMode;
+  
+  // Контроллеры для полей ввода ключей
+  late TextEditingController _orKeyController;
+  late TextEditingController _gcKeyController;
+  
+  bool _obscureKey = true; // Скрывать ли ключ звездочками
 
   @override
   void initState() {
@@ -37,20 +54,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
         ? widget.currentModel
         : OpenRouterConfig.defaultModel;
     _selectedPromptMode = widget.currentPromptMode;
+
+    // Инициализируем контроллеры текущими значениями
+    _orKeyController = TextEditingController(text: widget.currentOpenRouterKey);
+    _gcKeyController = TextEditingController(text: widget.currentGigaChatKey);
+  }
+
+  @override
+  void dispose() {
+    _orKeyController.dispose();
+    _gcKeyController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = MyApp.themeNotifier.value == ThemeMode.dark;
+    
+    // Определяем, какой контроллер показывать сейчас
+    final currentKeyController = _selectedProvider == 'OpenRouter' 
+        ? _orKeyController 
+        : _gcKeyController;
 
     return AlertDialog(
       title: const Text("Настройки"),
-      content: SingleChildScrollView( // Добавим скролл на случай маленьких экранов
+      content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- ВЫБОР РЕЖИМА ПРОМПТА (Аналитик / Нет) ---
+            // --- РЕЖИМ АССИСТЕНТА ---
             const Text("Режим ассистента:", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
@@ -93,7 +126,36 @@ class _SettingsDialogState extends State<SettingsDialog> {
               },
             ),
             
-            // --- ВЫБОР МОДЕЛИ (Только если выбран OpenRouter) ---
+            // --- ПОЛЕ ВВОДА КЛЮЧА (Динамическое) ---
+            const SizedBox(height: 16),
+            Text(
+              "API Ключ ($_selectedProvider):", 
+              style: const TextStyle(fontWeight: FontWeight.bold)
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: currentKeyController,
+              obscureText: _obscureKey,
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                hintText: _selectedProvider == 'OpenRouter' ? 'sk-or-...' : 'Base64 Auth Key',
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureKey ? Icons.visibility : Icons.visibility_off),
+                  onPressed: () {
+                    setState(() {
+                      _obscureKey = !_obscureKey;
+                    });
+                  },
+                ),
+              ),
+              onChanged: (value) {
+                // Сохраняем ключ при изменении
+                widget.onKeyChanged(_selectedProvider, value);
+              },
+            ),
+
+            // --- ВЫБОР МОДЕЛИ (Только OpenRouter) ---
             if (_selectedProvider == 'OpenRouter') ...[
               const SizedBox(height: 16),
               const Text("Модель OpenRouter:", style: TextStyle(fontWeight: FontWeight.bold)),

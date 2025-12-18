@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -33,6 +34,7 @@ migrate_working_dir/
 .pub/
 /build/
 .env
+Ключ giga и openrouter.ai .txt
 
 # Symbolication related
 app.*.symbols
